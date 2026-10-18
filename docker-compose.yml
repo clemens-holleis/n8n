@@ -38,12 +38,14 @@ services:
       - N8N_PROTOCOL=${N8N_PROTOCOL}
       - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_PROXY_HOPS=${N8N_PROXY_HOPS}
+      - N8N_CUSTOM_EXTENSIONS=${N8N_CUSTOM_EXTENSIONS}
     ports:
       - 5678:5678
     links:
       - postgres
     volumes:
       - n8n_storage:/home/node/.n8n
+      - /opt/n8n/custom-nodes:/home/node/custom-nodes:ro
     depends_on:
       postgres:
         condition: service_healthy
