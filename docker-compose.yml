@@ -23,9 +23,9 @@ services:
       - proxy-net
 
   n8n:
-    # TODO: upgrade asap
-    # image: n8nio/n8n:2.3.0
-    image: docker.n8n.io/n8nio/n8n
+    # image: docker.n8n.io/n8nio/n8n
+    image: docker.n8n.io/n8nio/n8n:2.43.7
+    container_name: n8n-main
     restart: always
     environment:
       - DB_TYPE=postgresdb
@@ -39,6 +39,14 @@ services:
       - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_PROXY_HOPS=${N8N_PROXY_HOPS}
       - N8N_CUSTOM_EXTENSIONS=${N8N_CUSTOM_EXTENSIONS}
+
+      #* Python Runner
+      #* https://docs.n8n.io/deploy/host-n8n/configure-n8n/set-up-task-runners#setting-up-external-mode
+      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
+      - N8N_RUNNERS_MODE=${N8N_RUNNERS_MODE}
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=${N8N_RUNNERS_BROKER_LISTEN_ADDRESS}
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_NATIVE_PYTHON_RUNNER=${N8N_NATIVE_PYTHON_RUNNER}
     ports:
       - 5678:5678
     links:
@@ -49,6 +57,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - proxy-net
+
+  task-runners:
+    image: n8nio/runners:2.43.7
+    container_name: n8n-runners
+    restart: always
+    environment:
+      - N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI}
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_LAUNCHER_LOG_LEVEL=${N8N_RUNNERS_LAUNCHER_LOG_LEVEL}
+      # etc.
+    depends_on:
+      - n8n
     networks:
       - proxy-net
 
